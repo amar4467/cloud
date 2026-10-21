@@ -1,0 +1,15 @@
+{
+  "name": "firebase",
+  "version": "1.0.0",
+  "description": "Firebase Cloud Services - Student Profile Manager",
+  "scripts": {
+    "serve": "firebase emulators:start --only hosting",
+    "deploy": "firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "firebase": "^10.12.2"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13.0.0"
+  }
+}

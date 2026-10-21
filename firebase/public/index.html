@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile Portal - Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 15px; }
+    section { border: 1px solid #000; padding: 20px; margin-bottom: 20px; }
+    button { padding: 8px 16px; cursor: pointer; margin: 10px 8px 0 0; }
+    #status { margin-top: 15px; font-weight: bold; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <h2>Student Profile Portal</h2>
+  <section>
+    <h3>User Authentication</h3>
+    <button id="signInBtn">Sign in with Google</button>
+    <button id="signOutBtn" hidden>Sign out</button>
+    <p id="accountStatus">Status: Not signed in</p>
+    <p id="status" role="status"></p>
+  </section>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import {
+      getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBgeKQhlAU2rD640LVWg-yf3UyZfFX-oQI",
+      authDomain: "cloudapp-bbf07.firebaseapp.com",
+      projectId: "cloudapp-bbf07",
+      storageBucket: "cloudapp-bbf07.firebasestorage.app",
+      messagingSenderId: "480802501746",
+      appId: "1:480802501746:web:936aa2c54ff627c6c07eeb"
+    };
+
+    // Change this filename to choose the page shown after successful login.
+    const REDIRECT_AFTER_LOGIN = "home.html";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const signInBtn = document.getElementById('signInBtn');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const accountStatus = document.getElementById('accountStatus');
+    const statusText = document.getElementById('status');
+
+    signInBtn.onclick = async () => {
+      try {
+        statusText.textContent = "Opening Google sign-in...";
+        await signInWithPopup(auth, provider);
+        statusText.textContent = "Sign-in successful. Redirecting...";
+        window.location.href = REDIRECT_AFTER_LOGIN;
+      } catch (err) {
+        statusText.textContent = err.message;
+      }
+    };
+
+    signOutBtn.onclick = async () => {
+      try {
+        await signOut(auth);
+        statusText.textContent = "Signed out successfully.";
+      } catch (err) {
+        statusText.textContent = err.message;
+      }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        signInBtn.hidden = true;
+        signOutBtn.hidden = false;
+        accountStatus.textContent = `Signed in as: ${user.displayName || "Google user"} (${user.email || "No email"})`;
+      } else {
+        signInBtn.hidden = false;
+        signOutBtn.hidden = true;
+        accountStatus.textContent = "Status: Not signed in";
+      }
+    });
+  </script>
+</body>
+</html>

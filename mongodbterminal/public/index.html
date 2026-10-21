@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MongoDB </title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f4f6f8; margin: 0; padding: 30px; display: flex; justify-content: center; }
+    .container { background: #fff; width: 100%; max-width: 600px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+    h1 { color: #13aa52; font-size: 24px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+    p.sub { color: #666; font-size: 14px; margin-top: 0; margin-bottom: 20px; }
+    
+  </style>
+</head>
+<body ng-app="mongoApp" ng-controller="MainController">
+
+  <div class="container">
+    <div class="status-badge"> Connected to MongoDB Atlas</div>
+    <h1>MongoDB </h1>
+    <p class="sub">Store and retrieve items directly with MongoDB Atlas via Express API.</p>
+
+    <!-- Add Item Form -->
+    <form ng-submit="addItem()" class="form-group">
+      <input type="text" ng-model="newItem.name" placeholder="Item Name (e.g. Laptop)" required />
+      <input type="text" ng-model="newItem.description" placeholder="Description (e.g. MacBook Pro 16 inch)" />
+      <button type="submit" class="btn-add">Add to MongoDB</button>
+    </form>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <!-- Items List -->
+    <h3>Saved Items ({{ items.length }})</h3>
+    <div ng-if="items.length === 0" class="empty-state">No items found in MongoDB yet. Add one above!</div>
+
+    <ul class="item-list">
+      <li class="item-card" ng-repeat="item in items">
+        <div class="item-info">
+          <h4>{{ item.name }}</h4>
+          <p>{{ item.description || 'No description provided' }}</p>
+        </div>
+        <button class="btn-delete" ng-click="deleteItem(item._id)">Delete</button>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    const app = angular.module('mongoApp', []);
+
+    app.controller('MainController', function($scope, $http) {
+      $scope.items = [];
+      $scope.newItem = {};
+
+      // Load all items from MongoDB
+      $scope.loadItems = function() {
+        $http.get('/api/items')
+          .then(function(response) {
+            $scope.items = response.data;
+          })
+          .catch(function(err) {
+            console.error('Error fetching items:', err);
+          });
+      };
+
+      // Add new item
+      $scope.addItem = function() {
+        if (!$scope.newItem.name) return;
+
+        $http.post('/api/items', $scope.newItem)
+          .then(function(response) {
+            $scope.items.unshift(response.data);
+            $scope.newItem = {}; // reset form
+          })
+          .catch(function(err) {
+            alert('Failed to add item: ' + (err.data?.error || err.statusText));
+          });
+      };
+
+      // Delete item
+      $scope.deleteItem = function(id) {
+        $http.delete('/api/items/' + id)
+          .then(function() {
+            $scope.items = $scope.items.filter(item => item._id !== id);
+          })
+          .catch(function(err) {
+            alert('Failed to delete item: ' + (err.data?.error || err.statusText));
+          });
+      };
+
+      // Initial fetch
+      $scope.loadItems();
+    });
+  </script>
+</body>
+</html>
+

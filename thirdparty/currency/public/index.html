@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Currency Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 450px;
+      margin: 40px auto;
+      padding: 0 15px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      padding: 7px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 7px 15px;
+      cursor: pointer;
+    }
+    .result {
+      border: 1px solid #000;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    #error {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Currency Converter</h2>
+
+  <form id="currencyForm">
+    <div class="form-group">
+      <label for="amount">Amount:</label>
+      <input type="number" id="amount" value="1" min="0.01" step="any" required>
+    </div>
+
+    <div class="form-group">
+      <label for="from">From Currency:</label>
+      <select id="from">
+        <option value="USD" selected>USD - US Dollar</option>
+        <option value="EUR">EUR - Euro</option>
+        <option value="INR">INR - Indian Rupee</option>
+        <option value="GBP">GBP - British Pound</option>
+        <option value="JPY">JPY - Japanese Yen</option>
+        <option value="CAD">CAD - Canadian Dollar</option>
+        <option value="AUD">AUD - Australian Dollar</option>
+        <option value="SGD">SGD - Singapore Dollar</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="to">To Currency:</label>
+      <select id="to">
+        <option value="INR" selected>INR - Indian Rupee</option>
+        <option value="USD">USD - US Dollar</option>
+        <option value="EUR">EUR - Euro</option>
+        <option value="GBP">GBP - British Pound</option>
+        <option value="JPY">JPY - Japanese Yen</option>
+        <option value="CAD">CAD - Canadian Dollar</option>
+        <option value="AUD">AUD - Australian Dollar</option>
+        <option value="SGD">SGD - Singapore Dollar</option>
+      </select>
+    </div>
+
+    <button type="submit">Convert</button>
+  </form>
+
+  <p id="error"></p>
+
+  <div id="result" class="result" style="display: none;">
+    <h3>Conversion Result</h3>
+    <p><b>Converted Value:</b> <span id="convertedVal"></span></p>
+    <p><b>Exchange Rate:</b> <span id="rateVal"></span></p>
+    <p><b>Date:</b> <span id="dateVal"></span></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('currencyForm');
+    const resultDiv = document.getElementById('result');
+    const errorText = document.getElementById('error');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const amount = document.getElementById('amount').value;
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('to').value;
+
+      errorText.textContent = '';
+      resultDiv.style.display = 'none';
+
+      try {
+        const res = await fetch(`/api/convert?amount=${amount}&from=${from}&to=${to}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Conversion failed');
+        }
+
+        document.getElementById('convertedVal').textContent = `${data.amount} ${data.from} = ${data.result} ${data.to}`;
+        document.getElementById('rateVal').textContent = `1 ${data.from} = ${data.rate} ${data.to}`;
+        document.getElementById('dateVal').textContent = data.date || 'Today';
+        resultDiv.style.display = 'block';
+      } catch (err) {
+        errorText.textContent = err.message;
+      }
+    };
+  </script>
+</body>
+</html>

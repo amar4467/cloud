@@ -1,0 +1,12 @@
+{
+  "name": "aqi-app",
+  "version": "1.0.0",
+  "description": "Third Party Air Quality Index (AQI) API using Open-Meteo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

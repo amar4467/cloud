@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // DEFAULT ACTIVE: COMBO 2 (FIRESTORE + HOSTING - NO LOGIN REQUIRED)
+    // Open read/write access so Firestore CRUD works directly
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if true;
+    }
+
+    /*
+    // =========================================================================
+    // COMBO 3: FIRESTORE + AUTH + HOSTING (WHEN GOOGLE LOGIN IS REQUIRED)
+    // If the examiner asks for Google Sign-In, comment out the rule above and 
+    // uncomment this block:
+    // =========================================================================
+    match /students/{studentId} {
+      allow create: if request.auth != null
+        && request.resource.data.ownerUid == request.auth.uid;
+      allow read, delete: if request.auth != null
+        && resource.data.ownerUid == request.auth.uid;
+      allow update: if request.auth != null
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid;
+    }
+    */
+
+  }
+}

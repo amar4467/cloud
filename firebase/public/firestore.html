@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile Portal - Firestore</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 15px; }
+    section { border: 1px solid #000; padding: 20px; margin-bottom: 20px; }
+    input, button { display: block; box-sizing: border-box; width: 100%; max-width: 420px; padding: 9px; margin: 10px 0; }
+    #status { font-weight: bold; overflow-wrap: anywhere; }
+    li { margin: 8px 0; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <h2>Firestore Demo</h2>
+  <section>
+    <h3>Create a Student Record</h3>
+    <form id="studentForm">
+      <input id="studentName" type="text" placeholder="Student name" required>
+      <input id="studentEmail" type="email" placeholder="Student email" required>
+      <button type="submit">Save to Firestore</button>
+    </form>
+    <p id="status" role="status"></p>
+  </section>
+  <section>
+    <h3>Saved Student Records</h3>
+    <button id="loadBtn" type="button">Refresh Records</button>
+    <ul id="studentList"></ul>
+  </section>
+  <p><a href="login.html">Login</a> | <a href="home.html">Static Home Page</a></p>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import {
+      getFirestore, collection, addDoc, getDocs, serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBgeKQhlAU2rD640LVWg-yf3UyZfFX-oQI",
+      authDomain: "cloudapp-bbf07.firebaseapp.com",
+      projectId: "cloudapp-bbf07",
+      storageBucket: "cloudapp-bbf07.firebasestorage.app",
+      messagingSenderId: "480802501746",
+      appId: "1:480802501746:web:936aa2c54ff627c6c07eeb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const studentsRef = collection(db, "students");
+    const form = document.getElementById("studentForm");
+    const statusText = document.getElementById("status");
+    const studentList = document.getElementById("studentList");
+
+    async function loadStudents() {
+      studentList.replaceChildren();
+      try {
+        const snapshot = await getDocs(studentsRef);
+        if (snapshot.empty) {
+          const li = document.createElement("li");
+          li.textContent = "No student records found.";
+          studentList.appendChild(li);
+          return;
+        }
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const li = document.createElement("li");
+          li.textContent = `${data.name || "Unnamed"} — ${data.email || "No email"}`;
+          studentList.appendChild(li);
+        });
+      } catch (err) {
+        statusText.textContent = "Could not load records: " + err.message;
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      statusText.textContent = "Saving record...";
+      try {
+        await addDoc(studentsRef, {
+          name: document.getElementById("studentName").value.trim(),
+          email: document.getElementById("studentEmail").value.trim(),
+          createdAt: serverTimestamp()
+        });
+        statusText.textContent = "Student record saved successfully.";
+        form.reset();
+        await loadStudents();
+      } catch (err) {
+        statusText.textContent = "Could not save record: " + err.message +
+          " Check that Firestore is enabled and your Firestore security rules allow this operation.";
+      }
+    });
+
+    document.getElementById("loadBtn").addEventListener("click", loadStudents);
+    loadStudents();
+  </script>
+</body>
+</html>

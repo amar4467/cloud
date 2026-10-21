@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NASA APOD Explorer</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { max-width: 850px; margin: 32px auto; padding: 0 18px; color: #222; background: #fff; font: 16px/1.5 Arial, sans-serif; }
+    main { border: 1px solid #ddd; border-radius: 8px; padding: 22px; }
+    input, button { padding: 9px 12px; font: inherit; }
+    button { color: #fff; background: #333; border: 0; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #555; }
+    img { display: block; max-width: 100%; height: auto; margin: 14px 0; border-radius: 4px; }
+    #message { min-height: 1.5em; font-weight: bold; }
+    a { color: #0066cc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>NASA Astronomy Picture of the Day</h1>
+    <label for="dateInput">Choose a date:</label>
+    <input type="date" id="dateInput" value="2024-01-01" />
+    <button type="button" onclick="getNasaData()">Load</button>
+    <p id="message" role="status"></p>
+    <section id="result" hidden>
+      <h2 id="title"></h2>
+      <p id="date"></p>
+      <p id="mediaType"></p>
+      <img id="apodImage" alt="NASA astronomy picture" hidden />
+      <a id="mediaLink" href="#" target="_blank">Open media</a>
+      <p id="explanation"></p>
+    </section>
+  </main>
+
+  <script>
+    const d = document.getElementById('dateInput');
+    const m = document.getElementById('message');
+    const r = document.getElementById('result');
+    const t = document.getElementById('title');
+    const dt = document.getElementById('date');
+    const mt = document.getElementById('mediaType');
+    const i = document.getElementById('apodImage');
+    const l = document.getElementById('mediaLink');
+    const e = document.getElementById('explanation');
+
+    async function getNasaData() {
+      m.innerText = 'Loading...';
+      r.hidden = true;
+      try {
+        const res = await fetch(`/api/apod?date=${d.value}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Fetch failed');
+
+        t.innerText = data.title;
+        dt.innerText = data.date;
+        mt.innerText = data.media_type;
+        e.innerText = data.explanation;
+
+        if (data.media_type === 'image') {
+          i.src = data.url;
+          i.hidden = false;
+          l.href = data.hdurl || data.url;
+          l.innerText = 'Open Image';
+        } else {
+          i.hidden = true;
+          l.href = data.url;
+          l.innerText = 'Open Video';
+        }
+
+        m.innerText = 'NASA data loaded successfully.';
+        r.hidden = false;
+      } catch (err) {
+        m.innerText = err.message;
+      }
+    }
+  </script>
+</body>
+</html>

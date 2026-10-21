@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NASA Astronomy Picture of the Day</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 550px;
+      margin: 40px auto;
+      padding: 0 15px;
+    }
+    input {
+      width: 100%;
+      padding: 7px;
+      margin: 8px 0;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 7px 15px;
+      cursor: pointer;
+    }
+    .result {
+      border: 1px solid #000;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 10px 0;
+      border: 1px solid #000;
+    }
+    #message {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>NASA Astronomy Picture of the Day</h2>
+
+  <form id="apodForm">
+    <label for="dateInput">Choose a Date:</label>
+    <input type="date" id="dateInput" value="2024-01-01" required>
+    <button type="submit">Load Picture</button>
+  </form>
+
+  <p id="message"></p>
+
+  <div id="result" class="result" style="display: none;">
+    <h3 id="title"></h3>
+    <p><b>Date:</b> <span id="date"></span></p>
+    <p><b>Media Type:</b> <span id="mediaType"></span></p>
+    <img id="apodImage" alt="NASA APOD" style="display: none;">
+    <p><a id="mediaLink" href="#" target="_blank">Open Full Media</a></p>
+    <p id="explanation"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('apodForm');
+    const dateInput = document.getElementById('dateInput');
+    const message = document.getElementById('message');
+    const resultDiv = document.getElementById('result');
+    const title = document.getElementById('title');
+    const dateText = document.getElementById('date');
+    const mediaType = document.getElementById('mediaType');
+    const apodImage = document.getElementById('apodImage');
+    const mediaLink = document.getElementById('mediaLink');
+    const explanation = document.getElementById('explanation');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      message.textContent = 'Loading NASA data...';
+      resultDiv.style.display = 'none';
+
+      try {
+        const res = await fetch(`/api/apod?date=${dateInput.value}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load NASA picture');
+        }
+
+        title.textContent = data.title;
+        dateText.textContent = data.date;
+        mediaType.textContent = data.media_type;
+        explanation.textContent = data.explanation;
+
+        if (data.media_type === 'image') {
+          apodImage.src = data.url;
+          apodImage.style.display = 'block';
+        } else {
+          apodImage.style.display = 'none';
+        }
+
+        mediaLink.href = data.hdurl || data.url;
+        message.textContent = '';
+        resultDiv.style.display = 'block';
+      } catch (err) {
+        message.textContent = err.message;
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 450px;
+      margin: 40px auto;
+      padding: 0 15px;
+    }
+    input {
+      width: 100%;
+      padding: 7px;
+      margin: 8px 0;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 7px 15px;
+      cursor: pointer;
+    }
+    .result {
+      border: 1px solid #000;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    #error {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Weather Information</h2>
+
+  <form id="weatherForm">
+    <label for="city">Enter City Name:</label>
+    <input type="text" id="city" placeholder="e.g. London, Chennai, Tokyo" required>
+    <button type="submit">Get Weather</button>
+  </form>
+
+  <p id="error"></p>
+
+  <div id="result" class="result" style="display: none;">
+    <h3>Weather Details</h3>
+    <p><b>Location:</b> <span id="loc"></span></p>
+    <p><b>Temperature:</b> <span id="temp"></span> °C</p>
+    <p><b>Wind Speed:</b> <span id="wind"></span> km/h</p>
+    <p><b>Observation Time:</b> <span id="time"></span></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('weatherForm');
+    const resultDiv = document.getElementById('result');
+    const errorText = document.getElementById('error');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const city = document.getElementById('city').value.trim();
+      errorText.textContent = '';
+      resultDiv.style.display = 'none';
+
+      try {
+        const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to get weather');
+        }
+
+        document.getElementById('loc').textContent = `${data.city}, ${data.country}`;
+        document.getElementById('temp').textContent = data.temperature;
+        document.getElementById('wind').textContent = data.windspeed;
+        document.getElementById('time').textContent = data.time;
+        resultDiv.style.display = 'block';
+      } catch (err) {
+        errorText.textContent = err.message;
+      }
+    };
+  </script>
+</body>
+</html>

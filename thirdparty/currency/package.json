@@ -1,0 +1,12 @@
+{
+  "name": "currency-converter",
+  "version": "1.0.0",
+  "description": "Third Party Currency Converter API using Frankfurter",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
