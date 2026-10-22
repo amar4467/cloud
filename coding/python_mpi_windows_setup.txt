@@ -1,0 +1,72 @@
+PYTHON MPI SETUP ON WINDOWS (CMD)
+===================================
+
+STEP 1 — Check Python
+Open Command Prompt (CMD) and run:
+    python --version
+If that does not work, try:
+    py --version
+
+STEP 2 — Download Microsoft MPI
+Download both files from the Microsoft MPI download page:
+    https://www.microsoft.com/en-us/download/details.aspx?id=105289
+
+Files:
+    msmpisetup.exe  — MPI Runtime
+    msmpisdk.msi    — MPI SDK
+
+STEP 3 — Install MPI
+1. Run msmpisetup.exe and finish the installation.
+2. Run msmpisdk.msi and finish the installation.
+3. Close CMD and open a new CMD window.
+4. Test:
+       mpiexec -help
+If Windows says mpiexec is not recognized, check the MPI installation/PATH.
+
+STEP 4 — Install mpi4py
+In CMD, run:
+    python -m pip install mpi4py
+
+STEP 5 — Create a working folder
+Run:
+    mkdir C:\mpi
+    cd C:\mpi
+    notepad mpi_test.py
+When Notepad opens, paste and save this code:
+
+    from mpi4py import MPI
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+
+    print(f"Hello from process {rank} out of {size}")
+
+Close Notepad after saving.
+
+STEP 6 — Run the MPI program
+In CMD, while in C:\mpi, run:
+    mpiexec -n 4 python mpi_test.py
+
+Expected output (the order may vary):
+    Hello from process 0 out of 4
+    Hello from process 1 out of 4
+    Hello from process 2 out of 4
+    Hello from process 3 out of 4
+
+WHAT THE COMMAND MEANS
+    mpiexec   — launches MPI processes
+    -n 4      — starts four processes
+    python    — runs the Python interpreter
+    mpi_test.py — the Python file to run
+
+TROUBLESHOOTING
+- 'python' is not recognized:
+  Try `py --version`; if that works, use `py` instead of `python`.
+- 'mpiexec' is not recognized:
+  Confirm Microsoft MPI Runtime is installed, then reopen CMD.
+- 'No module named mpi4py':
+  Run `python -m pip install mpi4py`.
+- DLL/import error:
+  Confirm the Microsoft MPI Runtime is installed, then retry the import test:
+      python -c "from mpi4py import MPI; print(MPI.Get_version())"

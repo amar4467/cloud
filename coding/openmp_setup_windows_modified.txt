@@ -1,0 +1,127 @@
+OPENMP SETUP ON WINDOWS (MSYS2 UCRT64)
+========================================
+
+This guide records the working setup for compiling and running an OpenMP C program
+on Windows using MSYS2 UCRT64 and GCC.
+
+IMPORTANT DIFFERENCE FROM MPI
+- OpenMP uses multiple threads in one process.
+- You do not use mpiexec for OpenMP.
+- Compile OpenMP programs with GCC's -fopenmp flag.
+
+STEP 1 — Install MSYS2
+1. Download MSYS2 from:
+   https://www.msys2.org/
+2. Install it (the default folder is usually C:\msys64).
+3. Open the terminal named "MSYS2 UCRT64".
+
+STEP 2 — Install GCC
+In the MSYS2 UCRT64 terminal, run:
+    pacman -S mingw-w64-ucrt-x86_64-gcc
+
+Type Y if it asks to proceed.
+
+STEP 3 — Install the OpenMP runtime package
+In the same UCRT64 terminal, run:
+    pacman -S mingw-w64-ucrt-x86_64-libgomp
+
+Type Y if it asks to proceed.
+If the package cannot be found, update MSYS2:
+    pacman -Syu
+Follow any instructions to close/reopen the terminal, then try the install command again.
+
+STEP 4 — Check the OpenMP library
+Run:
+    ls /ucrt64/lib/libgomp*
+
+You may see libgomp files such as libgomp.a or libgomp-1.dll.
+If you only see libgomp.spec, install/update the libgomp package as described above.
+
+STEP 5 — Create a folder and source file
+In UCRT64, run:
+    mkdir -p /c/omp
+    cd /c/omp
+    nano omp_test.c
+
+Paste this C program into nano:
+
+    #include <stdio.h>
+    #include <omp.h>
+
+    int main(void) {
+        #pragma omp parallel
+        {
+            int thread_id = omp_get_thread_num();
+            int total = omp_get_num_threads();
+            printf("Hello from thread %d out of %d\n", thread_id, total);
+        }
+        return 0;
+    }
+
+Save in nano:
+- Press Ctrl+O, then Enter to save.
+- Press Ctrl+X to exit.
+
+If you prefer Notepad, you can also open:
+    notepad C:\omp\omp_test.c
+But create the C:\omp folder first in Windows, or use nano from the UCRT64 terminal.
+
+STEP 6 — Compile the C program
+Make sure you are in /c/omp:
+    cd /c/omp
+
+Compile:
+    gcc -fopenmp omp_test.c -o omp1.exe
+
+If compilation succeeds, it usually returns to the prompt without printing anything.
+
+STEP 7 — Run the program
+Use:
+    ./omp1.exe
+
+IMPORTANT: Type ./omp1.exe (dot-slash), not /omp1.exe.
+- ./omp1.exe runs the executable in the current folder.
+- /omp1.exe looks for it at the filesystem root and will usually fail.
+
+STEP 8 — Choose a thread count (optional)
+To request 4 threads for this run:
+    OMP_NUM_THREADS=4 ./omp1.exe
+
+Expected output (the order may vary):
+    Hello from thread 0 out of 4
+    Hello from thread 1 out of 4
+    Hello from thread 2 out of 4
+    Hello from thread 3 out of 4
+
+TROUBLESHOOTING
+1. "gcc: command not found"
+   Install GCC in the MSYS2 UCRT64 terminal:
+       pacman -S mingw-w64-ucrt-x86_64-gcc
+
+2. "cannot find -lgomp"
+   Install the OpenMP runtime:
+       pacman -S mingw-w64-ucrt-x86_64-libgomp
+   Then check:
+       ls /ucrt64/lib/libgomp*
+
+3. "omp.c: No such file or directory"
+   The source file is named omp_test.c, so compile with:
+       gcc -fopenmp omp_test.c -o omp1.exe
+
+4. "No such file or directory" when running
+   Run the executable with dot-slash:
+       ./omp1.exe
+
+5. Copy/paste into MSYS2
+   Try Ctrl+Shift+V, Shift+Insert, or right-click, depending on terminal settings.
+   In the terminal Options > Keys, keep the copy/paste shortcut enabled and save.
+
+QUICK COMMAND SUMMARY
+---------------------
+cd /c/omp
+gcc -fopenmp omp_test.c -o omp1.exe
+./omp1.exe
+
+OFFICIAL REFERENCES
+- MSYS2: https://www.msys2.org/
+- GCC OpenMP documentation: https://gcc.gnu.org/onlinedocs/gcc/OpenMP.html
